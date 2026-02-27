@@ -73,6 +73,7 @@
 
     const starLabels = ["","แย่","พอใช้","ปานกลาง","ดี","ดีมาก"];
     let scores = {}, service = "", comment = "", recommend = null;
+    let customerName = "", location = "";
 
     function getAnswered() {
       return sections.flatMap(s=>s.qs).filter(q=>scores[q.id]>0).length;
@@ -86,8 +87,6 @@
       if (!ans.length) return 0;
       return (ans.reduce((s,q)=>s+(scores[q.id]||0),0)/ans.length).toFixed(1);
     }
-
-    let customerName = "", location = "";
 
     function render() {
       const answered = getAnswered();
@@ -112,12 +111,12 @@
         </div>
         <div class="card">
           <div class="card-label">👤 ชื่อของคุณ <span class="required">*</span></div>
-          <input type="text" placeholder="กรอกชื่อ-นามสกุล..." value="${customerName}" oninput="setName(this.value)"
+          <input id="inp-name" type="text" placeholder="กรอกชื่อ-นามสกุล..."
             style="width:100%;border-radius:10px;border:1.5px solid #e8e0d0;padding:10px 12px;font-size:13px;outline:none;font-family:sans-serif;background:#faf8f4;color:#1a1a1a;" />
         </div>
         <div class="card">
           <div class="card-label">📍 สถานที่ให้บริการ <span class="required">*</span></div>
-          <input type="text" placeholder="เช่น บ้านพักอาศัย, ออฟฟิศ..." value="${location}" oninput="setLocation(this.value)"
+          <input id="inp-location" type="text" placeholder="เช่น บ้านพักอาศัย, ออฟฟิศ..."
             style="width:100%;border-radius:10px;border:1.5px solid #e8e0d0;padding:10px 12px;font-size:13px;outline:none;font-family:sans-serif;background:#faf8f4;color:#1a1a1a;" />
         </div>
         <div class="card">
@@ -158,7 +157,7 @@
         </div>
         <div class="card">
           <div class="card-label">💡 ข้อเสนอแนะเพิ่มเติม (ถ้ามี)</div>
-          <textarea rows="3" placeholder="บอกเราได้เลย อยากให้ปรับปรุงอะไร หรือชื่นชมส่วนไหน..." oninput="setComment(this.value)"></textarea>
+          <textarea id="inp-comment" rows="3" placeholder="บอกเราได้เลย อยากให้ปรับปรุงอะไร หรือชื่นชมส่วนไหน..."></textarea>
         </div>
         <button class="btn-submit ${canSubmit?'ready':'disabled'}" onclick="submitForm()">
           ${canSubmit ? '✅ ส่งแบบฟอร์ม' : 'กรุณากรอกให้ครบ ('+answered+'/'+total+' ข้อ)'}
@@ -166,6 +165,38 @@
       </div>`;
 
       document.getElementById('app').innerHTML = html;
+
+      // restore ค่าหลัง render
+      const nameEl = document.getElementById('inp-name');
+      const locEl = document.getElementById('inp-location');
+      const commentEl = document.getElementById('inp-comment');
+
+      nameEl.value = customerName;
+      locEl.value = location;
+      commentEl.value = comment;
+
+      // ผูก event แบบ addEventListener (ไม่ trigger render ซ้ำ)
+      nameEl.addEventListener('input', e => { customerName = e.target.value; renderOnly(); });
+      locEl.addEventListener('input', e => { location = e.target.value; renderOnly(); });
+      commentEl.addEventListener('input', e => { comment = e.target.value; });
+    }
+
+    // อัปเดตเฉพาะ progress + ปุ่ม submit โดยไม่ rebuild HTML ทั้งหมด
+    function renderOnly() {
+      const answered = getAnswered();
+      const total = getTotal();
+      const canSubmit = answered === total && service && recommend !== null && customerName.trim() !== "" && location.trim() !== "";
+
+      const prog = document.querySelector('.progress-bar');
+      const progCount = document.querySelector('.progress-count');
+      const btn = document.querySelector('.btn-submit');
+
+      if (prog) prog.style.width = `${(answered/total)*100}%`;
+      if (progCount) progCount.textContent = `${answered}/${total} ข้อ`;
+      if (btn) {
+        btn.className = `btn-submit ${canSubmit?'ready':'disabled'}`;
+        btn.textContent = canSubmit ? '✅ ส่งแบบฟอร์ม' : `กรุณากรอกให้ครบ (${answered}/${total} ข้อ)`;
+      }
     }
 
     function renderThank() {
@@ -184,12 +215,9 @@
         </div>`;
     }
 
-    function setName(v) { customerName = v; render(); }
-    function setLocation(v) { location = v; render(); }
     function setService(v) { service = v; render(); }
     function setStar(id, v) { scores[id] = v; render(); }
     function setRecommend(v) { recommend = v; render(); }
-    function setComment(v) { comment = v; }
 
     async function submitForm() {
       const answered = getAnswered();
