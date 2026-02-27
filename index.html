@@ -4,9 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Roys Vesta — แบบฟอร์มความพึงพอใจ</title>
- <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
- <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: sans-serif; background: #faf8f4; }
@@ -16,210 +16,155 @@
   <div id="root"></div>
   <script type="text/babel">
 
-  
-  
-    const SHEET_URL = "https://script.google.com/macros/s/AKfycbwR-AXVXlNe55ArNmp1JCQSOe_RC7Tqp5woTzGKqmafFZVnxSIEEY4N5W3xB8GXoZ6SOQ/exec
-   
-    const C = {
-      black: "#0a0a0a", gold: "#b5a06a", goldLight: "#8a7550",
-      green: "#4e825a", white: "#ffffff", bg: "#faf8f4",
-      card: "#ffffff", border: "#e8e0d0", text: "#1a1a1a", sub: "#7a7060",
-    };
+    const SHEET_URL = "https://script.google.com/macros/s/AKfycbwR-AXVXlNe55ArNmp1JCQSOe_RC7Tqp5woTzGKqmafFZVnxSIEEY4N5W3xB8GXoZ6SOQ/exec";
 
     const sections = [
-      {
-        id: "admin", icon: "💬", title: "การติดต่อและนัดหมาย", subtitle: "ตั้งแต่แรกที่ติดต่อเข้ามา",
-        questions: [
-          { id: "a1", label: "แอดมินตอบไว และชัดเจน" },
-          { id: "a2", label: "การนัดหมายสะดวก ตรงเวลา" },
-          { id: "a3", label: "แอดมินพูดจาสุภาพ เป็นมิตร" },
-        ],
-      },
-      {
-        id: "team", icon: "👷", title: "ทีมงานที่เข้าให้บริการ", subtitle: "พฤติกรรมและความเป็นมืออาชีพ",
-        questions: [
-          { id: "t1", label: "ทีมงานมาตรงเวลา" },
-          { id: "t2", label: "แต่งกายสะอาด เรียบร้อย" },
-          { id: "t3", label: "สุภาพ และน่าไว้วางใจ" },
-        ],
-      },
-      {
-        id: "work", icon: "✨", title: "คุณภาพงาน", subtitle: "ผลลัพธ์หลังการให้บริการ",
-        questions: [
-          { id: "w1", label: "งานสะอาด เรียบร้อย ได้มาตรฐาน" },
-          { id: "w2", label: "ทำงานครบถ้วน ไม่มีตกหล่น" },
-          { id: "w3", label: "ดูแลทรัพย์สินในบ้านอย่างระมัดระวัง" },
-        ],
-      },
-      {
-        id: "value", icon: "💰", title: "ความคุ้มค่า", subtitle: "ราคาเทียบกับคุณภาพที่ได้รับ",
-        questions: [
-          { id: "v1", label: "ราคาเหมาะสมกับงานที่ได้รับ" },
-          { id: "v2", label: "โปรโมชั่น / แพ็คเกจน่าสนใจ" },
-        ],
-      },
+      { id:"admin", icon:"💬", title:"การติดต่อและนัดหมาย", sub:"ตั้งแต่แรกที่ติดต่อเข้ามา", qs:[
+        {id:"a1",label:"แอดมินตอบไว และชัดเจน"},
+        {id:"a2",label:"การนัดหมายสะดวก ตรงเวลา"},
+        {id:"a3",label:"แอดมินพูดจาสุภาพ เป็นมิตร"}]},
+      { id:"team", icon:"👷", title:"ทีมงานที่เข้าให้บริการ", sub:"พฤติกรรมและความเป็นมืออาชีพ", qs:[
+        {id:"t1",label:"ทีมงานมาตรงเวลา"},
+        {id:"t2",label:"แต่งกายสะอาด เรียบร้อย"},
+        {id:"t3",label:"สุภาพ และน่าไว้วางใจ"}]},
+      { id:"work", icon:"✨", title:"คุณภาพงาน", sub:"ผลลัพธ์หลังการให้บริการ", qs:[
+        {id:"w1",label:"งานสะอาด เรียบร้อย ได้มาตรฐาน"},
+        {id:"w2",label:"ทำงานครบถ้วน ไม่มีตกหล่น"},
+        {id:"w3",label:"ดูแลทรัพย์สินในบ้านอย่างระมัดระวัง"}]},
+      { id:"value", icon:"💰", title:"ความคุ้มค่า", sub:"ราคาเทียบกับคุณภาพที่ได้รับ", qs:[
+        {id:"v1",label:"ราคาเหมาะสมกับงานที่ได้รับ"},
+        {id:"v2",label:"โปรโมชั่น / แพ็คเกจน่าสนใจ"}]}
     ];
 
-    function StarRating({ value, onChange }) {
-      const [hover, setHover] = React.useState(0);
-      const labels = ["", "แย่", "พอใช้", "ปานกลาง", "ดี", "ดีมาก"];
-      const active = hover || value;
-      return (
-        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-          {[1,2,3,4,5].map(s => (
-            <span key={s} onClick={() => onChange(s)}
-              onMouseEnter={() => setHover(s)} onMouseLeave={() => setHover(0)}
-              style={{ fontSize: 26, cursor: "pointer", transition: "transform 0.1s",
-                transform: active >= s ? "scale(1.2)" : "scale(1)", opacity: active >= s ? 1 : 0.25 }}>⭐</span>
-          ))}
-          {active > 0 && <span style={{ fontSize: 12, color: C.gold, fontWeight: "bold", marginLeft: 6 }}>{labels[active]}</span>}
-        </div>
-      );
+    const starLabels = ["","แย่","พอใช้","ปานกลาง","ดี","ดีมาก"];
+    let scores = {}, service = "", comment = "", recommend = null;
+
+    function getAnswered() {
+      return sections.flatMap(s=>s.qs).filter(q=>scores[q.id]>0).length;
+    }
+    function getTotal() {
+      return sections.flatMap(s=>s.qs).length;
+    }
+    function getAvg() {
+      const qs = sections.flatMap(s=>s.qs);
+      const ans = qs.filter(q=>scores[q.id]>0);
+      if (!ans.length) return 0;
+      return (ans.reduce((s,q)=>s+(scores[q.id]||0),0)/ans.length).toFixed(1);
     }
 
-    function App() {
-      const [scores, setScores] = React.useState({});
-      const [service, setService] = React.useState("");
-      const [comment, setComment] = React.useState("");
-      const [recommend, setRecommend] = React.useState(null);
-      const [submitted, setSubmitted] = React.useState(false);
-      const [loading, setLoading] = React.useState(false);
-
-      const allQs = sections.flatMap(s => s.questions);
-      const answered = allQs.filter(q => scores[q.id] > 0).length;
-      const total = allQs.length;
-      const avg = answered > 0 ? (allQs.reduce((s, q) => s + (scores[q.id] || 0), 0) / answered).toFixed(1) : null;
+    function render() {
+      const answered = getAnswered();
+      const total = getTotal();
       const canSubmit = answered === total && service && recommend !== null;
 
-      const handleSubmit = async () => {
-        if (!canSubmit) return;
-        setLoading(true);
-        try {
-          await fetch(SHEET_URL, {
-            method: "POST",
-            body: JSON.stringify({ service, ...scores, recommend, comment }),
-          });
-        } catch (e) {}
-        setLoading(false);
-        setSubmitted(true);
-      };
-
-      if (submitted) {
-        return (
-          <div style={{ fontFamily: "sans-serif", minHeight: "100vh", background: C.black, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
-            <div style={{ background: C.white, borderRadius: 24, padding: 40, textAlign: "center", maxWidth: 380, boxShadow: "0 12px 40px rgba(0,0,0,0.4)" }}>
-              <div style={{ fontSize: 60 }}>🎉</div>
-              <h2 style={{ color: C.black, margin: "12px 0 8px" }}>ขอบคุณมากครับ!</h2>
-              <p style={{ color: C.sub, lineHeight: 1.7 }}>ความคิดเห็นของคุณมีคุณค่ามากสำหรับเรา<br />เราจะนำไปพัฒนาบริการให้ดียิ่งขึ้น</p>
-              <div style={{ margin: "20px 0", background: C.bg, borderRadius: 14, padding: 20, border: `2px solid ${C.border}` }}>
-                <div style={{ fontSize: 40, fontWeight: "bold", color: C.gold }}>{avg} / 5</div>
-                <div style={{ color: C.sub, fontSize: 13, marginTop: 4 }}>คะแนนเฉลี่ยของคุณ</div>
-              </div>
-              <button onClick={() => { setScores({}); setService(""); setComment(""); setRecommend(null); setSubmitted(false); }}
-                style={{ background: C.black, color: C.white, border: "none", borderRadius: 12, padding: "12px 28px", cursor: "pointer", fontSize: 14, fontWeight: "bold" }}>
-                ทำแบบฟอร์มใหม่
-              </button>
-            </div>
+      let html = `<div class="wrap">
+        <div class="header">
+          <div class="dots">
+            <div class="dot" style="background:#b5a06a"></div>
+            <div class="dot" style="background:#d4c9b8"></div>
+            <div class="dot" style="background:#fff"></div>
+            <div class="dot" style="background:#6a9e72"></div>
           </div>
-        );
-      }
+          <h1>ROYS VESTA</h1>
+          <p>แบบฟอร์มความพึงพอใจในการใช้บริการ</p>
+          <div class="divider"></div>
+        </div>
 
-      return (
-        <div style={{ fontFamily: "sans-serif", minHeight: "100vh", background: C.bg, padding: "24px 16px" }}>
-          <div style={{ maxWidth: 560, margin: "0 auto" }}>
+        <div class="card">
+          <div class="progress-label"><span>ความคืบหน้า</span><span class="progress-count">${answered}/${total} ข้อ</span></div>
+          <div class="progress-bar-bg"><div class="progress-bar" style="width:${(answered/total)*100}%"></div></div>
+        </div>
 
-            <div style={{ background: C.black, borderRadius: 20, padding: "32px 24px", textAlign: "center", marginBottom: 16 }}>
-              <div style={{ display: "flex", justifyContent: "center", gap: 4, marginBottom: 12 }}>
-                {["#b5a06a","#d4c9b8","#ffffff","#6a9e72"].map(c => (
-                  <div key={c} style={{ width: 14, height: 14, borderRadius: "50%", background: c }} />
-                ))}
-              </div>
-              <h1 style={{ margin: 0, fontSize: 24, color: C.white, letterSpacing: 2 }}>ROYS VESTA</h1>
-              <p style={{ margin: "8px 0 0", color: "#d4c9b8", fontSize: 13, letterSpacing: 1 }}>แบบฟอร์มความพึงพอใจในการใช้บริการ</p>
-              <div style={{ width: 40, height: 2, background: C.gold, margin: "16px auto 0" }} />
+        <div class="card">
+          <div class="card-label">🛠️ คุณใช้บริการอะไร? <span class="required">*</span></div>
+          <div class="btn-group">
+            ${["แม่บ้าน","ล้างแอร์","ทั้งสองอย่าง"].map(s=>`
+              <button class="btn-option ${service===s?'selected-gold':''}" onclick="setService('${s}')">${s==='แม่บ้าน'?'🧹':s==='ล้างแอร์'?'❄️':'🧹❄️'} ${s}</button>
+            `).join('')}
+          </div>
+        </div>`;
+
+      sections.forEach(sec => {
+        html += `<div class="card">
+          <div class="section-header">
+            <span>${sec.icon}</span><span class="section-title">${sec.title}</span>
+            <div class="section-sub">${sec.sub}</div>
+          </div>`;
+        sec.qs.forEach(q => {
+          const val = scores[q.id]||0;
+          html += `<div class="question">
+            <p>${q.label}</p>
+            <div class="stars">
+              ${[1,2,3,4,5].map(s=>`<span class="star ${val>=s?'active':''}" onclick="setStar('${q.id}',${s})">⭐</span>`).join('')}
+              ${val>0?`<span class="star-label">${starLabels[val]}</span>`:''}
             </div>
+          </div>`;
+        });
+        html += `</div>`;
+      });
 
-            <div style={{ background: C.card, borderRadius: 14, padding: "14px 20px", marginBottom: 12, border: `1px solid ${C.border}` }}>
-              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: C.sub, marginBottom: 8 }}>
-                <span>ความคืบหน้า</span>
-                <span style={{ color: C.gold, fontWeight: "bold" }}>{answered}/{total} ข้อ</span>
-              </div>
-              <div style={{ background: C.border, borderRadius: 99, height: 6 }}>
-                <div style={{ background: `linear-gradient(90deg, ${C.gold}, ${C.green})`, borderRadius: 99, height: 6, width: `${(answered/total)*100}%`, transition: "width 0.3s" }} />
-              </div>
-            </div>
-
-            <div style={{ background: C.card, borderRadius: 16, padding: "20px 24px", marginBottom: 12, border: `1px solid ${C.border}` }}>
-              <p style={{ margin: "0 0 14px", fontWeight: "bold", color: C.text, fontSize: 14 }}>🛠️ คุณใช้บริการอะไร? <span style={{ color: C.green }}>*</span></p>
-              <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                {[["🧹","แม่บ้าน"],["❄️","ล้างแอร์"],["🧹❄️","ทั้งสองอย่าง"]].map(([icon, label]) => (
-                  <button key={label} onClick={() => setService(label)} style={{
-                    flex: 1, minWidth: 100, padding: "12px 8px", borderRadius: 12, cursor: "pointer", fontSize: 13, fontWeight: "bold",
-                    border: service === label ? `2px solid ${C.gold}` : `2px solid ${C.border}`,
-                    background: service === label ? "#f5f0e8" : C.bg,
-                    color: service === label ? C.gold : C.sub, transition: "all 0.2s",
-                  }}>{icon} {label}</button>
-                ))}
-              </div>
-            </div>
-
-            {sections.map(sec => (
-              <div key={sec.id} style={{ background: C.card, borderRadius: 16, padding: "20px 24px", marginBottom: 12, border: `1px solid ${C.border}` }}>
-                <div style={{ marginBottom: 16, paddingBottom: 12, borderBottom: `1px solid ${C.border}` }}>
-                  <span style={{ fontSize: 20 }}>{sec.icon}</span>
-                  <span style={{ fontWeight: "bold", color: C.gold, fontSize: 15, marginLeft: 8 }}>{sec.title}</span>
-                  <p style={{ margin: "4px 0 0 28px", fontSize: 12, color: C.sub }}>{sec.subtitle}</p>
-                </div>
-                {sec.questions.map(q => (
-                  <div key={q.id} style={{ marginBottom: 18 }}>
-                    <p style={{ margin: "0 0 8px", fontSize: 14, color: C.text }}>{q.label}</p>
-                    <StarRating value={scores[q.id] || 0} onChange={v => setScores(prev => ({ ...prev, [q.id]: v }))} />
-                  </div>
-                ))}
-              </div>
-            ))}
-
-            <div style={{ background: C.card, borderRadius: 16, padding: "20px 24px", marginBottom: 12, border: `1px solid ${C.border}` }}>
-              <p style={{ margin: "0 0 14px", fontWeight: "bold", color: C.text, fontSize: 14 }}>🤝 คุณจะแนะนำ Roys Vesta ให้คนอื่นไหม? <span style={{ color: C.green }}>*</span></p>
-              <div style={{ display: "flex", gap: 10 }}>
-                {[["👍","แนะนำ",true],["🤔","ไม่แน่ใจ","maybe"],["👎","ไม่แนะนำ",false]].map(([icon, label, val]) => (
-                  <button key={label} onClick={() => setRecommend(val)} style={{
-                    flex: 1, padding: "12px 8px", borderRadius: 12, cursor: "pointer", fontSize: 13, fontWeight: "bold",
-                    border: recommend === val ? `2px solid ${C.green}` : `2px solid ${C.border}`,
-                    background: recommend === val ? "#eef4ef" : C.bg,
-                    color: recommend === val ? C.green : C.sub, transition: "all 0.2s",
-                  }}>{icon} {label}</button>
-                ))}
-              </div>
-            </div>
-
-            <div style={{ background: C.card, borderRadius: 16, padding: "20px 24px", marginBottom: 16, border: `1px solid ${C.border}` }}>
-              <p style={{ margin: "0 0 10px", fontWeight: "bold", color: C.text, fontSize: 14 }}>💡 ข้อเสนอแนะเพิ่มเติม (ถ้ามี)</p>
-              <textarea value={comment} onChange={e => setComment(e.target.value)}
-                placeholder="บอกเราได้เลย อยากให้ปรับปรุงอะไร หรือชื่นชมส่วนไหน..."
-                rows={3} style={{
-                  width: "100%", borderRadius: 10, border: `1.5px solid ${C.border}`, padding: "10px 12px",
-                  fontSize: 13, resize: "none", outline: "none", fontFamily: "sans-serif",
-                  background: C.bg, color: C.text,
-                }} />
-            </div>
-
-            <button onClick={handleSubmit} disabled={!canSubmit || loading} style={{
-              width: "100%", padding: "16px", borderRadius: 14, border: "none",
-              cursor: canSubmit ? "pointer" : "not-allowed",
-              background: canSubmit ? `linear-gradient(135deg, ${C.gold}, ${C.green})` : "#ddd",
-              color: canSubmit ? C.black : "#999", fontSize: 15, fontWeight: "bold",
-              marginBottom: 32, letterSpacing: 1, transition: "all 0.3s",
-            }}>
-              {loading ? "⏳ กำลังส่ง..." : canSubmit ? "✅ ส่งแบบฟอร์ม" : `กรุณากรอกให้ครบ (${answered}/${total} ข้อ)`}
-            </button>
-
+      html += `<div class="card">
+          <div class="card-label">🤝 คุณจะแนะนำ Roys Vesta ให้คนอื่นไหม? <span class="required">*</span></div>
+          <div class="btn-group">
+            <button class="btn-option ${recommend===true?'selected-green':''}" onclick="setRecommend(true)">👍 แนะนำ</button>
+            <button class="btn-option ${recommend==='maybe'?'selected-green':''}" onclick="setRecommend('maybe')">🤔 ไม่แน่ใจ</button>
+            <button class="btn-option ${recommend===false?'selected-green':''}" onclick="setRecommend(false)">👎 ไม่แนะนำ</button>
           </div>
         </div>
-      );
+
+        <div class="card">
+          <div class="card-label">💡 ข้อเสนอแนะเพิ่มเติม (ถ้ามี)</div>
+          <textarea rows="3" placeholder="บอกเราได้เลย อยากให้ปรับปรุงอะไร หรือชื่นชมส่วนไหน..." oninput="setComment(this.value)">${comment}</textarea>
+        </div>
+
+        <button class="btn-submit ${canSubmit?'ready':'disabled'}" onclick="submitForm()">
+          ${canSubmit ? '✅ ส่งแบบฟอร์ม' : 'กรุณากรอกให้ครบ ('+answered+'/'+total+' ข้อ)'}
+        </button>
+      </div>`;
+
+      document.getElementById('app').innerHTML = html;
     }
 
-    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+    function renderThank() {
+      document.getElementById('app').innerHTML = `
+        <div class="thank-wrap">
+          <div class="thank-card">
+            <div style="font-size:60px">🎉</div>
+            <h2>ขอบคุณมากครับ!</h2>
+            <p>ความคิดเห็นของคุณมีคุณค่ามากสำหรับเรา<br>เราจะนำไปพัฒนาบริการให้ดียิ่งขึ้น</p>
+            <div class="score-box">
+              <div class="score-num">${getAvg()} / 5</div>
+              <div class="score-sub">คะแนนเฉลี่ยของคุณ</div>
+            </div>
+            <button class="btn-reset" onclick="resetForm()">ทำแบบฟอร์มใหม่</button>
+          </div>
+        </div>`;
+    }
+
+    function setService(v) { service = v; render(); }
+    function setStar(id, v) { scores[id] = v; render(); }
+    function setRecommend(v) { recommend = v; render(); }
+    function setComment(v) { comment = v; }
+
+    async function submitForm() {
+      const answered = getAnswered();
+      const total = getTotal();
+      if (answered !== total || !service || recommend === null) return;
+      try {
+        await fetch(SHEET_URL, {
+          method: "POST",
+          body: JSON.stringify({ service, ...scores, recommend, comment })
+        });
+      } catch(e) {}
+      renderThank();
+    }
+
+    function resetForm() {
+      scores = {}; service = ""; comment = ""; recommend = null;
+      render();
+    }
+
+    render();
   </script>
 </body>
 </html>
