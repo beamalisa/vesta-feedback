@@ -73,7 +73,7 @@
 
     const starLabels = ["","แย่","พอใช้","ปานกลาง","ดี","ดีมาก"];
     let scores = {}, service = "", comment = "", recommend = null;
-    let customerName = "", placeLocation = "";
+    let custName = "", custPlace = "";
 
     function getAnswered() {
       return sections.flatMap(s=>s.qs).filter(q=>scores[q.id]>0).length;
@@ -88,10 +88,14 @@
       return (ans.reduce((s,q)=>s+(scores[q.id]||0),0)/ans.length).toFixed(1);
     }
 
+    function canSubmitNow() {
+      return getAnswered() === getTotal() && service && recommend !== null && custName.trim() !== "" && custPlace.trim() !== "";
+    }
+
     function render() {
       const answered = getAnswered();
       const total = getTotal();
-      const canSubmit = answered === total && service && recommend !== null && customerName.trim() !== "" && placeLocation.trim() !== "";
+      const ok = canSubmitNow();
 
       let html = `<div class="wrap">
         <div class="header">
@@ -116,7 +120,7 @@
         </div>
         <div class="card">
           <div class="card-label">📍 สถานที่ให้บริการ <span class="required">*</span></div>
-          <input id="inp-location" type="text" placeholder="เช่น บ้านพักอาศัย, ออฟฟิศ..."
+          <input id="inp-place" type="text" placeholder="เช่น บ้านพักอาศัย, ออฟฟิศ..."
             style="width:100%;border-radius:10px;border:1.5px solid #e8e0d0;padding:10px 12px;font-size:13px;outline:none;font-family:sans-serif;background:#faf8f4;color:#1a1a1a;" />
         </div>
         <div class="card">
@@ -159,44 +163,33 @@
           <div class="card-label">💡 ข้อเสนอแนะเพิ่มเติม (ถ้ามี)</div>
           <textarea id="inp-comment" rows="3" placeholder="บอกเราได้เลย อยากให้ปรับปรุงอะไร หรือชื่นชมส่วนไหน..."></textarea>
         </div>
-        <button class="btn-submit ${canSubmit?'ready':'disabled'}" onclick="submitForm()">
-          ${canSubmit ? '✅ ส่งแบบฟอร์ม' : 'กรุณากรอกให้ครบ ('+answered+'/'+total+' ข้อ)'}
+        <button class="btn-submit ${ok?'ready':'disabled'}" onclick="submitForm()">
+          ${ok ? '✅ ส่งแบบฟอร์ม' : 'กรุณากรอกให้ครบ ('+answered+'/'+total+' ข้อ)'}
         </button>
       </div>`;
 
       document.getElementById('app').innerHTML = html;
 
       // restore ค่าหลัง render
-      const nameEl = document.getElementById('inp-name');
-      const locEl = document.getElementById('inp-location');
-      const commentEl = document.getElementById('inp-comment');
+      document.getElementById('inp-name').value = custName;
+      document.getElementById('inp-place').value = custPlace;
+      document.getElementById('inp-comment').value = comment;
 
-      nameEl.value = customerName;
-      locEl.value = location;
-      commentEl.value = comment;
-
-      // ผูก event แบบ addEventListener (ไม่ trigger render ซ้ำ)
-      nameEl.addEventListener('input', e => { customerName = e.target.value; renderOnly(); });
-      locEl.addEventListener('input', e => { location = e.target.value; renderOnly(); });
-      commentEl.addEventListener('input', e => { comment = e.target.value; });
+      // event listeners — ไม่ trigger render() ซ้ำ
+      document.getElementById('inp-name').addEventListener('input', e => { custName = e.target.value; updateSubmitBtn(); });
+      document.getElementById('inp-place').addEventListener('input', e => { custPlace = e.target.value; updateSubmitBtn(); });
+      document.getElementById('inp-comment').addEventListener('input', e => { comment = e.target.value; });
     }
 
-    // อัปเดตเฉพาะ progress + ปุ่ม submit โดยไม่ rebuild HTML ทั้งหมด
-    function renderOnly() {
-      const answered = getAnswered();
-      const total = getTotal();
-      const canSubmit = answered === total && service && recommend !== null && customerName.trim() !== "" && location.trim() !== "";
-
-      const prog = document.querySelector('.progress-bar');
-      const progCount = document.querySelector('.progress-count');
+    function updateSubmitBtn() {
+      const ok = canSubmitNow();
+      const answered = getAnswered(), total = getTotal();
       const btn = document.querySelector('.btn-submit');
-
+      const prog = document.querySelector('.progress-bar');
+      const count = document.querySelector('.progress-count');
+      if (btn) { btn.className = `btn-submit ${ok?'ready':'disabled'}`; btn.textContent = ok ? '✅ ส่งแบบฟอร์ม' : `กรุณากรอกให้ครบ (${answered}/${total} ข้อ)`; }
       if (prog) prog.style.width = `${(answered/total)*100}%`;
-      if (progCount) progCount.textContent = `${answered}/${total} ข้อ`;
-      if (btn) {
-        btn.className = `btn-submit ${canSubmit?'ready':'disabled'}`;
-        btn.textContent = canSubmit ? '✅ ส่งแบบฟอร์ม' : `กรุณากรอกให้ครบ (${answered}/${total} ข้อ)`;
-      }
+      if (count) count.textContent = `${answered}/${total} ข้อ`;
     }
 
     function renderThank() {
@@ -220,20 +213,18 @@
     function setRecommend(v) { recommend = v; render(); }
 
     async function submitForm() {
-      const answered = getAnswered();
-      const total = getTotal();
-      if (answered !== total || !service || recommend === null) return;
+      if (!canSubmitNow()) return;
       try {
         await fetch(SHEET_URL, {
           method: "POST",
-          body: JSON.stringify({ customerName, location: placeLocation, service, ...scores, recommend, comment })
+          body: JSON.stringify({ customerName: custName, location: custPlace, service, ...scores, recommend, comment })
         });
       } catch(e) {}
       renderThank();
     }
 
     function resetForm() {
-      scores = {}; service = ""; comment = ""; recommend = null; customerName = ""; placeLocation = "";
+      scores = {}; service = ""; comment = ""; recommend = null; custName = ""; custPlace = "";
       render();
     }
 
