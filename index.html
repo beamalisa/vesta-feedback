@@ -51,7 +51,7 @@
 <body>
   <div id="app"></div>
   <script>
-    const SHEET_URL =   "https://script.google.com/macros/s/AKfycbxmqxkN-0vUHV1avdA-VD73jJVbSS-amEE-ke4KU7zSGFVxcLOoYAgTKYGZXUMlQyl7cw/exec"
+    const SHEET_URL = "https://script.google.com/macros/s/AKfycbwR-AXVXlNe55ArNmp1JCQSOe_RC7Tqp5woTzGKqmafFZVnxSIEEY4N5W3xB8GXoZ6SOQ/exec";
 
     const sections = [
       { id:"admin", icon:"💬", title:"การติดต่อและนัดหมาย", sub:"ตั้งแต่แรกที่ติดต่อเข้ามา", qs:[
@@ -87,10 +87,12 @@
       return (ans.reduce((s,q)=>s+(scores[q.id]||0),0)/ans.length).toFixed(1);
     }
 
+    let customerName = "", location = "";
+
     function render() {
       const answered = getAnswered();
       const total = getTotal();
-      const canSubmit = answered === total && service && recommend !== null;
+      const canSubmit = answered === total && service && recommend !== null && customerName.trim() !== "" && location.trim() !== "";
 
       let html = `<div class="wrap">
         <div class="header">
@@ -107,6 +109,16 @@
         <div class="card">
           <div class="progress-label"><span>ความคืบหน้า</span><span class="progress-count">${answered}/${total} ข้อ</span></div>
           <div class="progress-bar-bg"><div class="progress-bar" style="width:${(answered/total)*100}%"></div></div>
+        </div>
+        <div class="card">
+          <div class="card-label">👤 ชื่อของคุณ <span class="required">*</span></div>
+          <input type="text" placeholder="กรอกชื่อ-นามสกุล..." value="${customerName}" oninput="setName(this.value)"
+            style="width:100%;border-radius:10px;border:1.5px solid #e8e0d0;padding:10px 12px;font-size:13px;outline:none;font-family:sans-serif;background:#faf8f4;color:#1a1a1a;" />
+        </div>
+        <div class="card">
+          <div class="card-label">📍 สถานที่ให้บริการ <span class="required">*</span></div>
+          <input type="text" placeholder="เช่น บ้านพักอาศัย, ออฟฟิศ..." value="${location}" oninput="setLocation(this.value)"
+            style="width:100%;border-radius:10px;border:1.5px solid #e8e0d0;padding:10px 12px;font-size:13px;outline:none;font-family:sans-serif;background:#faf8f4;color:#1a1a1a;" />
         </div>
         <div class="card">
           <div class="card-label">🛠️ คุณใช้บริการอะไร? <span class="required">*</span></div>
@@ -172,6 +184,8 @@
         </div>`;
     }
 
+    function setName(v) { customerName = v; render(); }
+    function setLocation(v) { location = v; render(); }
     function setService(v) { service = v; render(); }
     function setStar(id, v) { scores[id] = v; render(); }
     function setRecommend(v) { recommend = v; render(); }
@@ -184,14 +198,14 @@
       try {
         await fetch(SHEET_URL, {
           method: "POST",
-          body: JSON.stringify({ service, ...scores, recommend, comment })
+          body: JSON.stringify({ customerName, location, service, ...scores, recommend, comment })
         });
       } catch(e) {}
       renderThank();
     }
 
     function resetForm() {
-      scores = {}; service = ""; comment = ""; recommend = null;
+      scores = {}; service = ""; comment = ""; recommend = null; customerName = ""; location = "";
       render();
     }
 
